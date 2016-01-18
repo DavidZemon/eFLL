@@ -1,5 +1,6 @@
 *.o
-*.bin
+bin/
+.idea/
 uml/*
 .DS_Store
 examples/.DS_Store

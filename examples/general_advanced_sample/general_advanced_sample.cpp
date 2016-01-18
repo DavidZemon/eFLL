@@ -1,4 +1,5 @@
-#include <iostream>
+#include <PropWare/printer/printer.h>
+#include <PropWare/c++allocate.h>
 #include "../../FuzzyRule.h"
 #include "../../FuzzyComposition.h"
 #include "../../Fuzzy.h"
@@ -8,8 +9,6 @@
 #include "../../FuzzyIO.h"
 #include "../../FuzzySet.h"
 #include "../../FuzzyRuleAntecedent.h"
-
-using namespace std;
 
 int main(int argc, char *argv[]) {
 	Fuzzy* fuzzy = new Fuzzy();
@@ -126,16 +125,16 @@ int main(int argc, char *argv[]) {
 
 	fuzzy->fuzzify();
 
-	cout << "Distância: " << close->getPertinence() << ", " << safe->getPertinence() << ", " << distante->getPertinence() << endl;
-	cout << "Velocidade: " << stoped->getPertinence() << ", " << slow->getPertinence() << ", " << normal->getPertinence() << ", " << quick->getPertinence() << endl;
-	cout << "Temperatura: " << cold->getPertinence() << ", " << good->getPertinence() << ", " << hot->getPertinence() << endl;
+	pwOut << "Distância: " << close->getPertinence() << ", " << safe->getPertinence() << ", " << distante->getPertinence() << '\n';
+	pwOut << "Velocidade: " << stoped->getPertinence() << ", " << slow->getPertinence() << ", " << normal->getPertinence() << ", " << quick->getPertinence() << '\n';
+	pwOut << "Temperatura: " << cold->getPertinence() << ", " << good->getPertinence() << ", " << hot->getPertinence() << '\n';
 
-	cout << "regra1: " << fuzzyRule1->isFired() << ", regra2: " << fuzzyRule2->isFired() << ", regra3: " << fuzzyRule3->isFired() << endl;
+	pwOut << "regra1: " << fuzzyRule1->isFired() << ", regra2: " << fuzzyRule2->isFired() << ", regra3: " << fuzzyRule3->isFired() << '\n';
 
 	float output1 = fuzzy->defuzzify(1);
 	float output2 = fuzzy->defuzzify(2);
 
-	cout << "Saída Risco: " << output1 << ", Saída Velocidade: " << output2 << endl;
-	
+	pwOut << "Saída Risco: " << output1 << ", Saída Velocidade: " << output2 << '\n';
+
 	return 0;
 }

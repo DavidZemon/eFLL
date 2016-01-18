@@ -1,4 +1,5 @@
-#include <iostream>
+#include <PropWare/printer/printer.h>
+#include <PropWare/c++allocate.h>
 #include "../../FuzzyRule.h"
 #include "../../FuzzyComposition.h"
 #include "../../Fuzzy.h"
@@ -9,15 +10,13 @@
 #include "../../FuzzySet.h"
 #include "../../FuzzyRuleAntecedent.h"
 
-using namespace std;
-
 int main(int argc, char *argv[]) {
 	// Instanciando um objeto da biblioteca
 	Fuzzy* fuzzy = new Fuzzy();
 
 	// Criando o FuzzyInput distancia
 	FuzzyInput* distance = new FuzzyInput(1);
-	// Criando os FuzzySet que compoem o FuzzyInput distancia 
+	// Criando os FuzzySet que compoem o FuzzyInput distancia
 	FuzzySet* small = new FuzzySet(0, 20, 20, 40); // Distancia pequena
 	distance->addFuzzySet(small); // Adicionando o FuzzySet small em distance
 	FuzzySet* safe = new FuzzySet(30, 50, 50, 70); // Distancia segura
@@ -29,7 +28,7 @@ int main(int argc, char *argv[]) {
 
 	// Criando o FuzzyOutput velocidade
 	FuzzyOutput* velocity = new FuzzyOutput(1);
-	// Criando os FuzzySet que compoem o FuzzyOutput velocidade 
+	// Criando os FuzzySet que compoem o FuzzyOutput velocidade
 	FuzzySet* slow = new FuzzySet(0, 10, 10, 20); // Velocidade lenta
 	velocity->addFuzzySet(slow); // Adicionando o FuzzySet slow em velocity
 	FuzzySet* average = new FuzzySet(10, 20, 30, 40); // Velocidade normal
@@ -73,7 +72,7 @@ int main(int argc, char *argv[]) {
 		fuzzy->fuzzify();
 
 		float output = fuzzy->defuzzify(1);
-		cout << "Entrada: " << dist << ", Saida: " << output << endl;
+		pwOut << "Entrada: " << dist << ", Saida: " << output << '\n';
 	}
 	return 0;
 }

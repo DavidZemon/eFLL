@@ -1,3 +1,6 @@
+#include <PropWare/printer/printer.h>
+#include <PropWare/pin.h>
+#include <PropWare/c++allocate.h>
 #include <FuzzyRule.h>
 #include <FuzzyComposition.h>
 #include <Fuzzy.h>
@@ -20,9 +23,9 @@ int total = 0;
 // stores the cumlative total
 int averageDistance = 0;
 // DYP-ME007 echo pin (digital 5)
-int echoPin = 5;
+PropWare::Pin echoPin(PropWare::Port::P5);
 // DYP-ME007 trigger pin (digital 4)
-int initPin = 4;
+PropWare::Pin initPin(PropWare::Port::P4);
 // stores the pulse in Micro Seconds
 unsigned long pulseTime = 0;
 // variable for storing the distance (cm)
@@ -31,41 +34,39 @@ unsigned long dist = 0;
 Fuzzy* fuzzy = new Fuzzy();
 
 void setup(){
-  Serial.begin(9600);
-  
   // set init pin as output
-  pinMode(initPin, OUTPUT);
+  initPin.set_dir_out();
   // set echo pin as input
-  pinMode(echoPin, INPUT);
+  echoPin.set_dir_in();
   // create array loop to iterate over every item in the array
   for (int thisReading = 0; thisReading < numOfReadings; thisReading++) {
     readings[thisReading] = 0;
   }
-  
+
   // Criando o FuzzyInput distancia
   FuzzyInput* distance = new FuzzyInput(1);
-  // Criando os FuzzySet que compoem o FuzzyInput distancia 
+  // Criando os FuzzySet que compoem o FuzzyInput distancia
   FuzzySet* small = new FuzzySet(0, 20, 20, 40); // Distancia pequena
   distance->addFuzzySet(small); // Adicionando o FuzzySet small em distance
   FuzzySet* safe = new FuzzySet(30, 50, 50, 70); // Distancia segura
   distance->addFuzzySet(safe); // Adicionando o FuzzySet safe em distance
   FuzzySet* big = new FuzzySet(60, 80, 80, 80); // Distancia grande
   distance->addFuzzySet(big); // Adicionando o FuzzySet big em distance
-  
+
   fuzzy->addFuzzyInput(distance); // Adicionando o FuzzyInput no objeto Fuzzy
-  
+
   // Criando o FuzzyOutput velocidade
   FuzzyOutput* velocity = new FuzzyOutput(1);
-  // Criando os FuzzySet que compoem o FuzzyOutput velocidade 
+  // Criando os FuzzySet que compoem o FuzzyOutput velocidade
   FuzzySet* slow = new FuzzySet(0, 10, 10, 20); // Velocidade lenta
   velocity->addFuzzySet(slow); // Adicionando o FuzzySet slow em velocity
   FuzzySet* average = new FuzzySet(10, 20, 30, 40); // Velocidade normal
   velocity->addFuzzySet(average); // Adicionando o FuzzySet average em velocity
   FuzzySet* fast = new FuzzySet(30, 40, 40, 50); // Velocidade alta
   velocity->addFuzzySet(fast); // Adicionando o FuzzySet fast em velocity
-  
+
   fuzzy->addFuzzyOutput(velocity); // Adicionando o FuzzyOutput no objeto Fuzzy
-  
+
   //-------------------- Montando as regras Fuzzy
   // FuzzyRule "SE distancia = pequena ENTAO velocidade = lenta"
   FuzzyRuleAntecedent* ifDistanceSmall = new FuzzyRuleAntecedent(); // Instanciando um Antecedente para a expresso
@@ -75,7 +76,7 @@ void setup(){
   // Instanciando um objeto FuzzyRule
   FuzzyRule* fuzzyRule01 = new FuzzyRule(1, ifDistanceSmall, thenVelocitySlow); // Passando o Antecedente e o Consequente da expressao
   fuzzy->addFuzzyRule(fuzzyRule01); // Adicionando o FuzzyRule ao objeto Fuzzy
-  
+
   // FuzzyRule "SE distancia = segura ENTAO velocidade = normal"
   FuzzyRuleAntecedent* ifDistanceSafe = new FuzzyRuleAntecedent(); // Instanciando um Antecedente para a expresso
   ifDistanceSafe->joinSingle(safe); // Adicionando o FuzzySet correspondente ao objeto Antecedente
@@ -84,7 +85,7 @@ void setup(){
   // Instanciando um objeto FuzzyRule
   FuzzyRule* fuzzyRule02 = new FuzzyRule(2, ifDistanceSafe, thenVelocityAverage); // Passando o Antecedente e o Consequente da expressao
   fuzzy->addFuzzyRule(fuzzyRule02); // Adicionando o FuzzyRule ao objeto Fuzzy
-  
+
   // FuzzyRule "SE distancia = grande ENTAO velocidade = alta"
   FuzzyRuleAntecedent* ifDistanceBig = new FuzzyRuleAntecedent(); // Instanciando um Antecedente para a expresso
   ifDistanceBig->joinSingle(big); // Adicionando o FuzzySet correspondente ao objeto Antecedente
@@ -95,16 +96,28 @@ void setup(){
   fuzzy->addFuzzyRule(fuzzyRule03); // Adicionando o FuzzyRule ao objeto Fuzzy
 }
 
+unsigned int pulseIn(const PropWare::Pin &pin, const bool triggerState) {
+  volatile unsigned int start = CNT;
+  if (triggerState) {
+    pin.wait_until_high();
+    pin.wait_until_low();
+  } else {
+    pin.wait_until_low();
+    pin.wait_until_high();
+  }
+  return CNT - start;
+}
+
 void loop(){
   // send 10 microsecond pulse
-  digitalWrite(initPin, HIGH);
+  initPin.high();
   // wait 10 microseconds before turning off
-  delayMicroseconds(10);
+  waitcnt(10*MICROSECOND + CNT);
   // stop sending the pulse
-  digitalWrite(initPin, LOW);
-  
+  initPin.low();
+
   // Look for a return pulse, it should be high as the pulse goes low-high-low
-  pulseTime = pulseIn(echoPin, HIGH);
+  pulseTime = pulseIn(echoPin, true);
   // Distance = pulse time / 58 to convert to cm.
   dist = pulseTime/58;
   // subtract the last distance
@@ -113,7 +126,7 @@ void loop(){
   readings[arrayIndex] = dist;
   // add the reading to the total
   total = total + readings[arrayIndex];
-  
+
   arrayIndex = arrayIndex + 1;
   // go to the next item in the array
   // At the end of the array (10 items) then start again
@@ -123,17 +136,21 @@ void loop(){
   // calculate the average distance
   averageDistance = total / numOfReadings;
   // print out the average distance to the debugger
-  
+
   fuzzy->setInput(1, averageDistance);
-  
+
   fuzzy->fuzzify();
 
   float output = fuzzy->defuzzify(1);
-  
-  Serial.print("Distancia: ");
-  Serial.print(averageDistance);
-  Serial.print("Velocidade: ");
-  Serial.println(output);
+
+  pwOut <<"Distancia: " << averageDistance << "Velocidade: " << output << '\n';
   // wait 100 milli seconds before looping again
-  delay(100);
+  waitcnt(100*MILLISECOND + CNT);
+}
+
+int main () {
+  setup();
+
+  while (true)
+    loop();
 }

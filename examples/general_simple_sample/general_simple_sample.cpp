@@ -1,14 +1,14 @@
 #include <PropWare/printer/printer.h>
 #include <PropWare/c++allocate.h>
-#include "../../FuzzyRule.h"
-#include "../../FuzzyComposition.h"
-#include "../../Fuzzy.h"
-#include "../../FuzzyRuleConsequent.h"
-#include "../../FuzzyOutput.h"
-#include "../../FuzzyInput.h"
-#include "../../FuzzyIO.h"
-#include "../../FuzzySet.h"
-#include "../../FuzzyRuleAntecedent.h"
+#include <FuzzyRule.h>
+#include <FuzzyComposition.h>
+#include <Fuzzy.h>
+#include <FuzzyRuleConsequent.h>
+#include <FuzzyOutput.h>
+#include <FuzzyInput.h>
+#include <FuzzyIO.h>
+#include <FuzzySet.h>
+#include <FuzzyRuleAntecedent.h>
 
 int main(int argc, char *argv[]) {
 	// Instanciando um objeto da biblioteca
